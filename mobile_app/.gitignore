@@ -1,0 +1,18 @@
+# Flutter and Dart tool artifacts
+.gradle/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+# IDE
+.idea/
+
+# Platform generated files
+android/
+ios/
+linux/
+macos/
+windows/
+web/
