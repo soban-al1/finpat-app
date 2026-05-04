@@ -48,6 +48,7 @@ const INITIAL_DATA: UserData = {
 
 const FinContext = createContext<FinContextType | undefined>(undefined);
 const SESSION_KEY = 'finpat_session';
+const LAST_RESET_KEY = 'finpat_last_reset';
 
 interface StoredSession {
   accessToken: string;
@@ -93,6 +94,7 @@ function mapObligation(obligation: ApiObligation): Obligation {
     type: obligation.type,
     dueDate: obligation.due_date ?? undefined,
     goalAmount: obligation.goal_amount ?? undefined,
+    remittedAmount: obligation.remitted_amount ?? undefined,
     isEssential: obligation.is_essential,
     centerId: obligation.center_id,
     isCompleted: obligation.is_completed,
@@ -182,6 +184,24 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     void fetchAllData(session);
   }, [session]);
+
+  // Auto-reset monthly obligations at the start of each new month.
+  // Runs once on mount (and whenever the user finishes onboarding).
+  // For online users the server handles the actual reset; for offline users
+  // the local state is reset. Either way the new month starts fresh
+  // without users having to press the manual Reset button.
+  useEffect(() => {
+    if (!userData.isLoggedIn || !userData.onboarded) return;
+    if (userData.obligations.length === 0) return;
+
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const lastReset = localStorage.getItem(LAST_RESET_KEY);
+
+    if (!lastReset || lastReset < currentMonth) {
+      resetCycle();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData.isLoggedIn, userData.onboarded]);
 
   const updateUserData = (data: Partial<UserData>) => {
     setUserData((prev) => {
@@ -285,6 +305,7 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         type: obligation.type,
         due_date: obligation.dueDate ?? null,
         goal_amount: obligation.goalAmount ?? null,
+        remitted_amount: null,
         is_essential: obligation.isEssential,
         is_completed: false,
         completed_at: null,
@@ -314,14 +335,20 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       let newRemittances = [...prev.remittances];
       if (isBecomingComplete) {
+        const incomeCurrency = prev.income.currency;
+        // Compute exchange rate: 1 unit of obligation.currency = N units of income.currency
+        // convertCurrency(1, from, to) gives the per-unit rate, which is exactly what we need.
+        const exchangeRate = obligation.currency === incomeCurrency
+          ? 1
+          : convertCurrency(1, obligation.currency, incomeCurrency);
         const newRemittance: Remittance = {
           id: Math.random().toString(36).substr(2, 9),
           date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           amount: obligation.amount,
           currency: obligation.currency,
-          targetCurrency: obligation.currency,
-          rate: 1,
+          targetCurrency: incomeCurrency,
+          rate: exchangeRate,
           purpose: obligation.title,
           centerId: obligation.centerId,
           obligationId: obligation.id,
@@ -339,9 +366,15 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!obligation) return;
 
     const isBecomingComplete = !obligation.isCompleted;
-    void obligationsApi.update(session.accessToken, id, {
+    // Use the toggle-obligation edge function so it handles both the obligation
+    // status update AND remittance creation with the real DB exchange rate.
+    void edgeFunctionsApi.toggleObligation(session.accessToken, {
+      obligation_id: id,
       is_completed: isBecomingComplete,
-      completed_at: isBecomingComplete ? new Date().toISOString() : null,
+    }).then(() => {
+      // Re-sync local state from the server so the remittance (with the real
+      // exchange rate) replaces the optimistic mock-rate version.
+      void fetchAllData(session);
     });
   };
 
@@ -411,23 +444,48 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetCycle = () => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    localStorage.setItem(LAST_RESET_KEY, currentMonth);
+
     if (session) {
-      const cycleMonth = new Date().toISOString().slice(0, 7);
-      void edgeFunctionsApi.resetCycle(session.accessToken, { cycle_month: cycleMonth }).then(() => {
-        void fetchAllData(session);
+      // For goal-based monthly obligations, accumulate this cycle's payments into
+      // remitted_amount BEFORE the server wipes remittances, so history is preserved.
+      const goalObligations = userData.obligations.filter(
+        (o) => o.type === 'monthly' && o.goalAmount != null,
+      );
+
+      const updatePromises = goalObligations.map((o) => {
+        const cycleAmount = userData.remittances
+          .filter((r) => r.obligationId === o.id)
+          .reduce((acc, r) => acc + r.amount, 0);
+        const newRemittedAmount = (o.remittedAmount ?? 0) + cycleAmount;
+        return obligationsApi.update(session.accessToken, o.id, {
+          remitted_amount: newRemittedAmount,
+        });
+      });
+
+      void Promise.all(updatePromises).then(() => {
+        void edgeFunctionsApi.resetCycle(session.accessToken, { cycle_month: currentMonth }).then(() => {
+          void fetchAllData(session);
+        });
       });
       return;
     }
 
+    // ── Offline mode ──
     setUserData(prev => {
-      const totalIncome = prev.income.amount;
-      const totalCommitted = prev.obligations.reduce((acc, obj) => {
-        return acc + convertCurrency(obj.amount, obj.currency, prev.income.currency);
-      }, 0);
-      
-      const surplus = Math.max(0, totalIncome - totalCommitted);
-      
       const now = new Date();
+      const totalIncome = prev.income.amount;
+
+      // Only monthly obligations count toward the cycle surplus calculation
+      const totalCommitted = prev.obligations
+        .filter(o => o.type === 'monthly')
+        .reduce((acc, obj) => {
+          return acc + convertCurrency(obj.amount, obj.currency, prev.income.currency);
+        }, 0);
+
+      const surplus = Math.max(0, totalIncome - totalCommitted);
+
       const newSavings: SavingsLog[] = [...prev.savings];
       if (surplus > 0) {
         newSavings.push({
@@ -440,11 +498,26 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
 
-      const resetObligations = prev.obligations.map(o => ({
-        ...o,
-        isCompleted: false,
-        completedAt: undefined,
-      }));
+      const resetObligations = prev.obligations.map(o => {
+        // One-time obligations are never auto-reset
+        if (o.type !== 'monthly') return o;
+
+        // For goal-based obligations, accumulate this cycle's payments into
+        // remittedAmount before remittances are cleared, preserving history.
+        if (o.goalAmount != null) {
+          const cycleAmount = prev.remittances
+            .filter(r => r.obligationId === o.id)
+            .reduce((acc, r) => acc + r.amount, 0);
+          return {
+            ...o,
+            isCompleted: false,
+            completedAt: undefined,
+            remittedAmount: (o.remittedAmount ?? 0) + cycleAmount,
+          };
+        }
+
+        return { ...o, isCompleted: false, completedAt: undefined };
+      });
 
       return {
         ...prev,

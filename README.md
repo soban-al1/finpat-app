@@ -30,3 +30,13 @@ Delivery sequence:
 
 - Never commit real secrets/tokens.
 - Use `specs/start.md` as implementation entry point.
+
+## Secret Scan Before Push
+
+- Run one-time hook setup:
+  - `bash scripts/install-git-hooks.sh`
+- Manual scan any time:
+  - `bash scripts/scan-secrets.sh`
+
+The pre-push hook blocks pushes when high-risk secret patterns are found in
+tracked files (for example private keys, service role keys, or JWT-like tokens).

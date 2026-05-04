@@ -1,10 +1,8 @@
-import 'package:finpat_mobile/app/app_scope.dart';
 import 'package:finpat_mobile/core/theme/app_theme.dart';
 import 'package:finpat_mobile/core/theme/ui_tokens.dart';
 import 'package:finpat_mobile/features/centers/presentation/centers_screen.dart';
 import 'package:finpat_mobile/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:finpat_mobile/features/finance/presentation/finance_screen.dart';
-import 'package:finpat_mobile/features/forecast/presentation/forecast_screen.dart';
 import 'package:finpat_mobile/features/settings/presentation/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -19,14 +17,11 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   bool _showSettings = false;
 
-  static const _titles = ['Home', 'Commitments', 'Spent', 'Savings', 'Forecast'];
-
   final List<Widget> _screens = const [
     DashboardScreen(),
     CentersScreen(),
     FinanceScreen(initialTab: 0, showTabs: false),
     FinanceScreen(initialTab: 1, showTabs: false),
-    ForecastScreen(),
   ];
 
   @override
@@ -43,44 +38,29 @@ class _HomeShellState extends State<HomeShell> {
                     borderRadius: BorderRadius.circular(UiTokens.radiusPill),
                     onTap: () => setState(() => _showSettings = true),
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(22),
                       ),
                       child: const Icon(Icons.person_outline, color: AppTheme.primary),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _titles[_index],
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: AppTheme.primary,
-                                fontSize: 30,
-                              ),
-                        ),
-                        Text(
-                          (AppScope.of(context).profile?['name'] ?? 'Architect').toString(),
-                          style: const TextStyle(
-                            color: AppTheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const Spacer(),
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: AppTheme.primary,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.2),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
                     alignment: Alignment.center,
                     child: const Text(
@@ -94,15 +74,12 @@ class _HomeShellState extends State<HomeShell> {
             Expanded(
               child: Stack(
                 children: [
+                  // IndexedStack keeps all screens alive so tab switching is
+                  // instant — no rebuild, no animation delay, scroll state preserved.
                   Positioned.fill(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: KeyedSubtree(
-                        key: ValueKey(_index),
-                        child: _screens[_index],
-                      ),
+                    child: IndexedStack(
+                      index: _index,
+                      children: _screens,
                     ),
                   ),
                   Positioned.fill(
@@ -171,29 +148,24 @@ class _HomeShellState extends State<HomeShell> {
         indicatorColor: AppTheme.primary.withValues(alpha: 0.15),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view_rounded),
+            label: 'HOME',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_tree_outlined),
-            selectedIcon: Icon(Icons.account_tree),
-            label: 'Commitments',
+            icon: Icon(Icons.track_changes_outlined),
+            selectedIcon: Icon(Icons.track_changes),
+            label: 'COMMITMENTS',
           ),
           NavigationDestination(
-            icon: Icon(Icons.payments_outlined),
-            selectedIcon: Icon(Icons.payments),
-            label: 'Spent',
+            icon: Icon(Icons.send_outlined),
+            selectedIcon: Icon(Icons.send),
+            label: 'SPENT',
           ),
           NavigationDestination(
-            icon: Icon(Icons.savings_outlined),
-            selectedIcon: Icon(Icons.savings),
-            label: 'Savings',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.query_stats_outlined),
-            selectedIcon: Icon(Icons.query_stats),
-            label: 'Forecast',
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: Icon(Icons.account_balance_wallet),
+            label: 'SAVINGS',
           ),
         ],
       ),

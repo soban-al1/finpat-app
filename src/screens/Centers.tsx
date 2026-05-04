@@ -130,9 +130,12 @@ export const Centers: React.FC = () => {
 
               <div className="space-y-6">
                 {obligations.map((o) => {
-                  const totalPaidForThis = userData.remittances
+                  const currentCyclePaidForThis = userData.remittances
                     .filter(r => r.obligationId === o.id)
                     .reduce((acc, r) => acc + r.amount, 0);
+                  // Include historical amount accumulated across past cycles so goal
+                  // progress is preserved through monthly resets.
+                  const totalPaidForThis = (o.remittedAmount ?? 0) + currentCyclePaidForThis;
                   const progress = o.goalAmount ? (totalPaidForThis / o.goalAmount) * 100 : 0;
 
                   return (
@@ -148,23 +151,19 @@ export const Centers: React.FC = () => {
                           >
                             {o.isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-on-surface-variant/10" />}
                           </button>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={cn("text-on-surface font-extrabold text-base tracking-tight", o.isCompleted && "line-through opacity-50")}>{o.title}</span>
-                              <div className="flex items-center gap-1.5">
-                                {o.type === 'monthly' ? (
-                                  <div className="p-1 bg-primary/5 rounded-md"><Repeat className="w-3 h-3 text-primary/40" /></div>
-                                ) : (
-                                  <div className="p-1 bg-primary/5 rounded-md"><Calendar className="w-3 h-3 text-primary/40" /></div>
-                                )}
-                                {o.isEssential && (
-                                  <span className="text-[8px] font-black uppercase tracking-widest bg-error/10 text-error px-1.5 py-0.5 rounded-full">Essential</span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.1em] text-on-surface-variant/40">
-                              <span className="bg-surface-container px-2 py-0.5 rounded-md">{o.type}</span>
-                              {o.dueDate && <span className="text-error/60 font-black">• Due {o.dueDate}</span>}
+                          <div className="space-y-1.5 min-w-0">
+                            <span className={cn("text-on-surface font-extrabold text-base tracking-tight block leading-tight", o.isCompleted && "line-through opacity-50")}>{o.title}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {o.type === 'monthly' ? (
+                                <div className="p-1 bg-primary/5 rounded-md shrink-0"><Repeat className="w-3 h-3 text-primary/40" /></div>
+                              ) : (
+                                <div className="p-1 bg-primary/5 rounded-md shrink-0"><Calendar className="w-3 h-3 text-primary/40" /></div>
+                              )}
+                              {o.isEssential && (
+                                <span className="text-[8px] font-black uppercase tracking-widest bg-error/10 text-error px-1.5 py-0.5 rounded-full shrink-0">Essential</span>
+                              )}
+                              <span className="bg-surface-container px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-[0.1em] text-on-surface-variant/40 shrink-0">{o.type}</span>
+                              {o.dueDate && <span className="text-[9px] text-error/60 font-black shrink-0">· Due {o.dueDate}</span>}
                             </div>
                           </div>
                         </div>
@@ -181,24 +180,39 @@ export const Centers: React.FC = () => {
                       </div>
 
                       {o.goalAmount && (
-                        <div className="space-y-2.5 pl-11">
-                          <div className="flex justify-between items-end">
-                            <div className="space-y-0.5">
+                        <div className="space-y-2.5 pl-11 pt-1">
+                          <div className="p-3 bg-surface-container-low/40 rounded-2xl space-y-2.5 border border-surface-container/40">
+                            <div className="flex justify-between items-center">
                               <p className="text-[8px] font-black uppercase tracking-widest text-on-surface-variant/40">Settlement Goal</p>
-                              <p className="text-xs font-extrabold text-on-surface-variant">{formatCurrency(o.goalAmount, o.currency)}</p>
+                              <span className={cn(
+                                "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full",
+                                progress >= 100
+                                  ? "bg-tertiary/20 text-tertiary"
+                                  : "bg-surface-container text-on-surface-variant/40"
+                              )}>
+                                {progress >= 100 ? '✓ Complete' : `${Math.round(progress)}%`}
+                              </span>
                             </div>
-                            <div className="text-right">
-                              <p className="text-xs font-black text-tertiary">{Math.round(progress)}%</p>
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <p className="text-[9px] text-on-surface-variant/40 font-medium">Paid so far</p>
+                                <p className="text-xs font-black text-tertiary">{formatCurrency(totalPaidForThis, o.currency)}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[9px] text-on-surface-variant/40 font-medium">Goal</p>
+                                <p className="text-xs font-extrabold text-on-surface-variant">{formatCurrency(o.goalAmount, o.currency)}</p>
+                              </div>
                             </div>
-                          </div>
-                          <div className="relative h-2 bg-surface-container rounded-full overflow-hidden">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(100, progress)}%` }}
-                              className="h-full bg-tertiary relative"
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
-                            </motion.div>
+                            <div className="relative h-1.5 bg-surface-container rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(100, progress)}%` }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                                className={cn("h-full relative", progress >= 100 ? "bg-tertiary" : "bg-primary/60")}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
+                              </motion.div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -206,14 +220,17 @@ export const Centers: React.FC = () => {
                   );
                 })}
                 {obligations.length === 0 && (
-                  <button 
+                  <button
                     onClick={() => handleStartWizard(center.id)}
-                    className="w-full py-12 text-center space-y-3 bg-surface-container-low/20 rounded-[2rem] border border-dashed border-surface-container hover:bg-surface-container-low/40 transition-all group/empty"
+                    className="w-full py-10 text-center space-y-4 bg-surface-container-low/20 rounded-[2rem] border-2 border-dashed border-surface-container hover:bg-surface-container-low/40 transition-all group/empty"
                   >
-                    <div className="w-12 h-12 bg-surface-container rounded-2xl flex items-center justify-center mx-auto text-on-surface-variant/20 group-hover/empty:scale-110 group-hover/empty:text-primary/40 transition-all">
-                      <Plus className="w-6 h-6" />
+                    <div className="w-16 h-16 bg-surface-container rounded-2xl flex items-center justify-center mx-auto group-hover/empty:scale-105 group-hover/empty:bg-primary/10 transition-all">
+                      <Plus className="w-8 h-8 text-on-surface-variant/30 group-hover/empty:text-primary/60 transition-all" />
                     </div>
-                    <p className="text-xs font-bold text-on-surface-variant/40 uppercase tracking-widest group-hover/empty:text-primary/60 transition-all">No active commitments</p>
+                    <div className="space-y-1">
+                      <p className="text-xs font-black text-on-surface-variant/40 uppercase tracking-widest group-hover/empty:text-primary/60 transition-all">No active commitments</p>
+                      <p className="text-[10px] text-on-surface-variant/30 font-medium group-hover/empty:text-primary/40 transition-all">Tap to add your first commitment</p>
+                    </div>
                   </button>
                 )}
               </div>

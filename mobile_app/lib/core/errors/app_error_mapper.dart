@@ -18,6 +18,16 @@ class AppErrorMapper {
       }
       return error.message;
     }
+    if (error is FunctionException) {
+      // Extract the actual message the edge function returned.
+      final details = error.details;
+      if (details is Map) {
+        final msg = details['message'] ?? details['error'] ?? details['msg'];
+        if (msg != null) return msg.toString();
+      }
+      if (details is String && details.isNotEmpty) return details;
+      return 'Edge function error (HTTP ${error.reasonPhrase ?? "unknown"}).';
+    }
     return 'Something went wrong. Please try again.';
   }
 }

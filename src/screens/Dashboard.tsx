@@ -278,16 +278,27 @@ export const Dashboard: React.FC = () => {
               </motion.div>
               {obj.goalAmount && !obj.isCompleted && (
                 <div className="px-5 pb-4 -mt-2">
-                  <div className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/40 mb-1">
-                    <span>Progress to {formatCurrency(obj.goalAmount, obj.currency)}</span>
-                    <span>{Math.round((userData.remittances.filter(r => r.obligationId === obj.id).reduce((acc, r) => acc + r.amount, 0) / obj.goalAmount) * 100)}%</span>
-                  </div>
-                  <div className="h-1 bg-surface-container rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-tertiary/40" 
-                      style={{ width: `${Math.min(100, (userData.remittances.filter(r => r.obligationId === obj.id).reduce((acc, r) => acc + r.amount, 0) / obj.goalAmount) * 100)}%` }}
-                    />
-                  </div>
+                  {(() => {
+                    const currentCyclePaid = userData.remittances
+                      .filter(r => r.obligationId === obj.id)
+                      .reduce((acc, r) => acc + r.amount, 0);
+                    const totalPaid = (obj.remittedAmount ?? 0) + currentCyclePaid;
+                    const pct = Math.round((totalPaid / obj.goalAmount) * 100);
+                    return (
+                      <>
+                        <div className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/40 mb-1">
+                          <span>Progress to {formatCurrency(obj.goalAmount, obj.currency)}</span>
+                          <span>{pct}%</span>
+                        </div>
+                        <div className="h-1 bg-surface-container rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-tertiary/40"
+                            style={{ width: `${Math.min(100, pct)}%` }}
+                          />
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </React.Fragment>

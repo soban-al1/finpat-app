@@ -103,6 +103,8 @@ export interface Obligation {
   type: 'monthly' | 'one-time';
   due_date: string | null;
   goal_amount: number | null;
+  /** Cumulative amount paid toward goal_amount across all past cycles (persists through monthly resets) */
+  remitted_amount: number | null;
   is_essential: boolean;
   is_completed: boolean;
   completed_at: string | null;
