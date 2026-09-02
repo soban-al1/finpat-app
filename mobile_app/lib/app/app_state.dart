@@ -216,6 +216,11 @@ class AppStateController extends ChangeNotifier {
   Future<void> signOut() async {
     _bootstrapping = false; // allow bootstrap after next sign-in
     await _client.auth.signOut();
+    _clearSession();
+  }
+
+  /// Drops every trace of the signed-in user from memory.
+  void _clearSession() {
     profile = null;
     centers = [];
     obligations = [];
@@ -224,6 +229,35 @@ class AppStateController extends ChangeNotifier {
     dashboardSummary = null;
     _fxWarmed = false;
     notifyListeners();
+  }
+
+  /// Permanently deletes the account and everything belonging to it.
+  ///
+  /// Removing the auth record requires the service-role key, so the work is
+  /// done by the `delete-account` edge function; this only reacts to the
+  /// result. Returns null on success, or a message to show the user.
+  Future<String?> deleteAccount() async {
+    if (currentUser == null) return 'Not authenticated.';
+    try {
+      final result = await _client.functions.invoke('delete-account');
+      final data = result.data;
+      if (data is Map && data['error'] != null) {
+        return data['error'].toString();
+      }
+
+      // The auth record is gone, so the access token is already dead and
+      // signOut may legitimately fail. Local state has to be cleared either way.
+      _bootstrapping = false;
+      try {
+        await _client.auth.signOut();
+      } catch (_) {
+        // Expected once the user no longer exists server-side.
+      }
+      _clearSession();
+      return null;
+    } catch (e) {
+      return AppErrorMapper.toMessage(e);
+    }
   }
 
   // ── Onboarding ────────────────────────────────────────────────────────────
@@ -431,11 +465,46 @@ class AppStateController extends ChangeNotifier {
     }
   }
 
-  /// Resolves the exchange rate from [fromCurrency] to [toCurrency] using the
-  /// server-side `currency_rates` cache (populated by `warmExchangeRates`).
+  /// Static fallback rates (units of currency per 1 USD).
+  /// Mirrors the server-side FALLBACK_RATES so the fallback code path also
+  /// produces correct conversions when the DB cache is empty or stale.
+  static const Map<String, double> _fallbackRatesFromUsd = {
+    'USD': 1.0,
+    'EUR': 0.92,
+    'GBP': 0.79,
+    'AED': 3.67,
+    'INR': 83.12,
+    'PHP': 56.45,
+    'PKR': 278.5,
+    'EGP': 30.91,
+    'MYR': 4.78,
+    'SGD': 1.35,
+    'IDR': 16150,
+    'THB': 36.15,
+    'VND': 24500,
+    'BND': 1.35,
+    'MMK': 2100,
+    'KHR': 4100,
+    'LAK': 21000,
+  };
+
+  /// Derives a cross-rate via USD from the static fallback table.
+  /// Returns null if either currency is unknown.
+  double? _staticFallbackRate(String from, String to) {
+    if (from == to) return 1.0;
+    final fromPerUsd = _fallbackRatesFromUsd[from.toUpperCase()];
+    final toPerUsd = _fallbackRatesFromUsd[to.toUpperCase()];
+    if (fromPerUsd == null || toPerUsd == null) return null;
+    return toPerUsd / fromPerUsd;
+  }
+
+  /// Resolves the exchange rate from [fromCurrency] to [toCurrency].
   ///
-  /// Fetches both the direct pair and the reverse pair in a single DB query
-  /// to avoid two sequential round-trips.
+  /// Priority:
+  ///   1. Live DB cache  (direct pair)
+  ///   2. Live DB cache  (inverse pair → reciprocal)
+  ///   3. Static fallback table (cross-rate via USD)
+  ///   4. 1.0 last-resort (unknown currency pair)
   Future<double> _lookupExchangeRate(
     String fromCurrency,
     String toCurrency,
@@ -467,8 +536,9 @@ class AppStateController extends ChangeNotifier {
       }
     }
 
-    // No cached rate found — return 1.0 so the insert never fails.
-    return 1.0;
+    // No cached rate found — use static fallback before giving up with 1.0.
+    // This prevents a missing cache from making e.g. Rs 50,000 appear as $50,000.
+    return _staticFallbackRate(fromCurrency, toCurrency) ?? 1.0;
   }
 
   /// Direct PostgREST fallback used when `toggle-obligation` edge function
