@@ -9,13 +9,29 @@ build/
 # IDE
 .idea/
 
-# Platform generated files
-android/
-ios/
-linux/
-macos/
-windows/
-web/
+# macOS
+.DS_Store
+
+# Native build output only. The platform directories THEMSELVES are tracked:
+# they hold the release signing config, the manifest, the applicationId and the
+# launcher icon. `flutter create` cannot regenerate those customisations, so
+# ignoring android/ wholesale means the release setup exists on one machine and
+# nowhere else.
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+
+# Signing material and credentials — never commit
+android/key.properties
+android/**/*.jks
+android/**/*.keystore
+android/PLAY_STORE_UPLOAD.txt
 
 # Local environment secrets (never commit)
 .env

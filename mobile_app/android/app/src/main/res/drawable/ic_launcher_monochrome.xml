@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FinPat adaptive icon — monochrome layer (Android 13+ themed icons).
+  Same geometry as the foreground; the system supplies the tint, so every
+  shape is flat black and the destination node is left solid to keep the
+  silhouette readable once colour is stripped away.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M36.121,71.312 A37.189,37.189 0 0 1 70.177,38.391"
+        android:strokeColor="#000000"
+        android:strokeWidth="5.676"
+        android:strokeLineCap="round"/>
+
+    <path
+        android:pathData="M31.013,71.312a5.108,5.108 0 1,0 10.216,0a5.108,5.108 0 1,0 -10.216,0z"
+        android:fillColor="#000000"/>
+
+    <path
+        android:pathData="M62.798,38.391a7.379,7.379 0 1,0 14.758,0a7.379,7.379 0 1,0 -14.758,0z"
+        android:fillColor="#000000"/>
+</vector>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FinPat adaptive icon — foreground layer.
+
+  The mark: an arc rising from a mint node (work, abroad) to a gold node
+  (home). The mark's bounding circle is 60dp across, centred in the 108dp
+  viewport — so it clears the worst-case 66dp mask crop with ~3dp to spare
+  instead of sitting flush against it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- arc -->
+    <path
+        android:pathData="M36.121,71.312 A37.189,37.189 0 0 1 70.177,38.391"
+        android:strokeColor="#B4EDDD"
+        android:strokeWidth="5.676"
+        android:strokeLineCap="round"/>
+
+    <!-- origin node (work / abroad) -->
+    <path
+        android:pathData="M31.013,71.312a5.108,5.108 0 1,0 10.216,0a5.108,5.108 0 1,0 -10.216,0z"
+        android:fillColor="#5FC9B2"/>
+
+    <!-- destination node (home) -->
+    <path
+        android:pathData="M62.798,38.391a7.379,7.379 0 1,0 14.758,0a7.379,7.379 0 1,0 -14.758,0z"
+        android:fillColor="#F5A623"/>
+</vector>
