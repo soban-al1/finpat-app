@@ -1,0 +1,99 @@
+<svg viewBox="0 0 1200 627" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LinkedIn post image: The most exciting time to be in product">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f13"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6c63ff"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6c63ff;stop-opacity:0"/>
+      <stop offset="30%" style="stop-color:#6c63ff;stop-opacity:1"/>
+      <stop offset="70%" style="stop-color:#a78bfa;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="627" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="104.5" x2="1200" y2="104.5"/>
+    <line x1="0" y1="209" x2="1200" y2="209"/>
+    <line x1="0" y1="313.5" x2="1200" y2="313.5"/>
+    <line x1="0" y1="418" x2="1200" y2="418"/>
+    <line x1="0" y1="522.5" x2="1200" y2="522.5"/>
+    <line x1="200" y1="0" x2="200" y2="627"/>
+    <line x1="400" y1="0" x2="400" y2="627"/>
+    <line x1="600" y1="0" x2="600" y2="627"/>
+    <line x1="800" y1="0" x2="800" y2="627"/>
+    <line x1="1000" y1="0" x2="1000" y2="627"/>
+  </g>
+
+  <!-- Right side abstract circles / orb -->
+  <circle cx="950" cy="314" r="260" fill="none" stroke="#6c63ff" stroke-width="1" opacity="0.12"/>
+  <circle cx="950" cy="314" r="200" fill="none" stroke="#a78bfa" stroke-width="1" opacity="0.1"/>
+  <circle cx="950" cy="314" r="140" fill="none" stroke="#6c63ff" stroke-width="1.5" opacity="0.15"/>
+  <circle cx="950" cy="314" r="80" fill="#6c63ff" opacity="0.06"/>
+
+  <!-- Orbiting dots -->
+  <circle cx="950" cy="54" r="5" fill="#a78bfa" opacity="0.7" filter="url(#softglow)"/>
+  <circle cx="1198" cy="240" r="4" fill="#6c63ff" opacity="0.6" filter="url(#softglow)"/>
+  <circle cx="1100" cy="544" r="4" fill="#a78bfa" opacity="0.5" filter="url(#softglow)"/>
+  <circle cx="702" cy="430" r="3" fill="#6c63ff" opacity="0.6" filter="url(#softglow)"/>
+  <circle cx="730" cy="200" r="3.5" fill="#a78bfa" opacity="0.5"/>
+
+  <!-- Center orb glow -->
+  <circle cx="950" cy="314" r="40" fill="#6c63ff" opacity="0.15" filter="url(#glow)"/>
+  <circle cx="950" cy="314" r="22" fill="#6c63ff" opacity="0.25"/>
+  <circle cx="950" cy="314" r="10" fill="#a78bfa" opacity="0.9" filter="url(#softglow)"/>
+
+  <!-- Role pill labels orbiting -->
+  <rect x="870" y="42" width="100" height="26" rx="13" fill="#6c63ff" opacity="0.2"/>
+  <text x="920" y="59" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle" opacity="0.9">Design</text>
+  <rect x="1118" y="301" width="76" height="26" rx="13" fill="#6c63ff" opacity="0.2"/>
+  <text x="1156" y="318" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle" opacity="0.9">Eng</text>
+  <rect x="1056" y="536" width="100" height="26" rx="13" fill="#6c63ff" opacity="0.2"/>
+  <text x="1106" y="553" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle" opacity="0.9">Growth</text>
+  <rect x="698" y="430" width="92" height="26" rx="13" fill="#6c63ff" opacity="0.2"/>
+  <text x="744" y="447" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle" opacity="0.9">UX</text>
+  <rect x="720" y="175" width="100" height="26" rx="13" fill="#6c63ff" opacity="0.2"/>
+  <text x="770" y="192" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle" opacity="0.9">Ship</text>
+
+  <!-- Connector lines from orb to pills -->
+  <line x1="950" y1="294" x2="932" y2="68" stroke="#6c63ff" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+  <line x1="970" y1="314" x2="1118" y2="314" stroke="#6c63ff" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+  <line x1="966" y1="330" x2="1070" y2="536" stroke="#6c63ff" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+  <line x1="930" y1="330" x2="762" y2="443" stroke="#6c63ff" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+  <line x1="934" y1="295" x2="800" y2="188" stroke="#6c63ff" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+
+  <!-- Left: Main text content -->
+  <rect x="80" y="100" width="170" height="32" rx="16" fill="#6c63ff" opacity="0.18"/>
+  <rect x="80" y="100" width="170" height="32" rx="16" fill="none" stroke="#6c63ff" stroke-width="1" opacity="0.4"/>
+  <text x="165" y="121" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="12" font-weight="600" fill="#a78bfa" text-anchor="middle" letter-spacing="2">PM × BUILDER</text>
+
+  <text x="80" y="210" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="62" font-weight="800" fill="#ffffff" opacity="0.97">The most</text>
+  <text x="80" y="284" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="62" font-weight="800" fill="#ffffff" opacity="0.97">exciting time</text>
+  <text x="80" y="358" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="62" font-weight="800" fill="url(#accent)">to be a builder.</text>
+
+  <rect x="80" y="374" width="540" height="3" rx="2" fill="url(#lineGrad)" opacity="0.7"/>
+
+  <text x="80" y="430" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="20" fill="#94a3b8" font-weight="400">One person. Every role. Shipping the whole thing.</text>
+
+  <line x1="80" y1="480" x2="320" y2="480" stroke="#334155" stroke-width="1"/>
+
+  <text x="80" y="520" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="15" fill="#64748b" font-weight="500">Building in public → sharing the journey</text>
+
+  <text x="1120" y="600" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="13" fill="#334155" text-anchor="middle">finpat.app</text>
+</svg>
