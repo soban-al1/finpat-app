@@ -64,8 +64,8 @@ export const Savings: React.FC = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className={cn(
-                    "w-10 h-10 rounded-2xl flex items-center justify-center",
-                    log.type === 'surplus' ? "bg-primary/10 text-primary" : "bg-tertiary/10 text-tertiary"
+                    "w-10 h-10 rounded-full flex items-center justify-center",
+                    log.type === 'surplus' ? "bg-primary/10 text-primary" : "bg-surface-container text-on-surface-variant"
                   )}>
                     {log.type === 'surplus' ? <ArrowUpRight className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                   </div>

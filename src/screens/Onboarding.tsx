@@ -5,8 +5,19 @@ import { Currency, DEFAULT_CENTERS, SalaryFrequency, ResponsibilityCenter, CURRE
 import { cn } from '../lib/utils';
 import { ChevronRight, ChevronLeft, Check, MapPin, Heart, Calendar, Repeat, Clock, X } from 'lucide-react';
 
+// Maps the names that the backend seeds on signup → the corresponding
+// frontend DEFAULT_CENTERS id, so we can detect which seeded centers the
+// user did NOT select and remove them from the database.
+const SEEDED_NAME_TO_FRONTEND_ID: Record<string, string> = {
+  'Household': 'household',
+  'Parents': 'parents',
+  'Spouse/Children': 'family',
+  'Property': 'property',
+  'Charity': 'charity',
+};
+
 export const Onboarding: React.FC = () => {
-  const { updateUserData } = useFinData();
+  const { updateUserData, userData, addCenter, deleteCenter } = useFinData();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     workLocation: '',
@@ -23,8 +34,24 @@ export const Onboarding: React.FC = () => {
   const prevStep = () => setStep((s) => s - 1);
 
   const handleComplete = () => {
+    // Remove any seeded centers the user did NOT select, so the Commitments
+    // screen only shows what the user explicitly chose during onboarding.
+    userData.centers.forEach((dbCenter) => {
+      const frontendId = SEEDED_NAME_TO_FRONTEND_ID[dbCenter.name];
+      const wasSelected = frontendId
+        ? formData.selectedCenters.includes(frontendId)
+        : false; // unknown / leftover from a prior session — clean up
+      if (!wasSelected) {
+        deleteCenter(dbCenter.id);
+      }
+    });
+
+    // Persist any custom centers the user created during onboarding.
+    formData.customCenters.forEach((c) => addCenter(c));
+
     const defaultSelected = DEFAULT_CENTERS.filter(c => formData.selectedCenters.includes(c.id));
     const centers = [...defaultSelected, ...formData.customCenters];
+
     updateUserData({
       onboarded: true,
       workLocation: formData.workLocation,
@@ -34,7 +61,7 @@ export const Onboarding: React.FC = () => {
         currency: formData.incomeCurrency,
         frequency: formData.incomeFrequency,
       },
-      centers: centers,
+      centers,
     });
   };
 

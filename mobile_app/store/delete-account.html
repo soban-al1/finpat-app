@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delete your account — FinPat</title>
+<meta name="description" content="How to permanently delete your FinPat account and all associated data.">
+<style>
+  :root{
+    --bg:#f8fafb; --surface:#ffffff; --ink:#191c1d; --muted:#3f484c;
+    --brand:#004d60; --brand-2:#00677f; --accent:#f5a623; --line:#dfe5e7;
+    --critical:#ba1a1a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1618; --surface:#141f22; --ink:#e8eded; --muted:#a8b6ba;
+      --brand:#7fd8e8; --brand-2:#9fe3d2; --line:#243033; --critical:#ffb4ab;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 20px 96px}
+  header{background:linear-gradient(135deg,var(--brand-2),var(--brand));color:#fff;padding:56px 20px 44px;margin-bottom:40px}
+  @media (prefers-color-scheme: dark){ header{background:linear-gradient(135deg,#00303d,#001b23)} }
+  header .wrap{padding-bottom:0}
+  .mark{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .mark span{font-weight:800;letter-spacing:-.4px;font-size:20px}
+  h1{margin:0 0 10px;font-size:clamp(28px,5vw,38px);font-weight:800;letter-spacing:-1px}
+  .sub{margin:0;opacity:.85;font-size:15px}
+  h2{margin:40px 0 14px;font-size:20px;font-weight:800;letter-spacing:-.3px;color:var(--brand);padding-top:20px;border-top:1px solid var(--line)}
+  @media (prefers-color-scheme: dark){ h2{color:var(--brand-2)} }
+  p,li{color:var(--muted)}
+  a{color:var(--brand)} @media (prefers-color-scheme: dark){ a{color:var(--brand-2)} }
+  strong{color:var(--ink)}
+  ol{padding-left:22px} ol li{margin:10px 0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:20px 0}
+  .warn{border-left:3px solid var(--critical);background:var(--surface);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0}
+  .warn strong{color:var(--critical)}
+  .note{border-left:3px solid var(--accent);background:var(--surface);padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:15px}
+  .ph{background:rgba(245,166,35,.16);border-bottom:1px dashed var(--accent);padding:0 4px;border-radius:3px;font-weight:700;color:var(--ink)}
+  .path{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-weight:700;color:var(--ink);white-space:nowrap}
+  footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  table{border-collapse:collapse;width:100%;font-size:15px;margin:8px 0}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-weight:800;color:var(--ink)} td{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="mark" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 108 108">
+        <rect width="108" height="108" rx="24" fill="rgba(255,255,255,.12)"/>
+        <path d="M36.121,71.312 A37.189,37.189 0 0 1 70.177,38.391"
+              stroke="#b4eddd" stroke-width="5.676" fill="none" stroke-linecap="round"/>
+        <circle cx="36.121" cy="71.312" r="5.108" fill="#5fc9b2"/>
+        <circle cx="70.177" cy="38.391" r="7.379" fill="#f5a623"/>
+      </svg>
+      <span>FinPat</span>
+    </div>
+    <h1>Delete your account</h1>
+    <p class="sub">Two ways to permanently remove your FinPat account and data.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>Option 1 — In the app (fastest)</h2>
+  <div class="card">
+    <ol>
+      <li>Open FinPat and sign in.</li>
+      <li>Go to <span class="path">Settings</span>.</li>
+      <li>Under <strong>Actions</strong>, tap <span class="path">Delete Account</span>.</li>
+      <li>Type <strong>DELETE</strong> to confirm.</li>
+    </ol>
+    <p style="margin-bottom:0">Your account and data are erased immediately and
+    you are signed out.</p>
+  </div>
+
+  <h2>Option 2 — By email</h2>
+  <p>If you can't sign in, email
+  <strong><a href="mailto:privacy@finpat.app">privacy@finpat.app</a></strong> from the address
+  on your FinPat account with the subject <strong>“Delete my account”</strong>.</p>
+  <p>We may ask one question to confirm you own the account. We complete
+  verified requests within <strong>30 days</strong>.</p>
+
+  <h2>What gets deleted</h2>
+  <table>
+    <thead><tr><th>Deleted permanently</th><th>What it covers</th></tr></thead>
+    <tbody>
+      <tr><td>Your account</td><td>Email address and sign-in credentials</td></tr>
+      <tr><td>Your profile</td><td>Name, work and family locations, income settings</td></tr>
+      <tr><td>Responsibility centres</td><td>Everyone you were tracking support for</td></tr>
+      <tr><td>Obligations</td><td>Commitments, due dates, and goal progress</td></tr>
+      <tr><td>Remittances</td><td>Your full history of money sent home</td></tr>
+      <tr><td>Savings</td><td>Every manual and surplus savings entry</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <strong>This cannot be undone.</strong> Deletion is immediate and permanent —
+    there is no recovery window and no way to restore your history afterwards. If
+    you only want to start over, use <span class="path">Settings → Reset All Data</span>
+    instead, which clears your records but keeps your account.
+  </div>
+
+  <h2>Retention</h2>
+  <p>Your data is removed from our live systems immediately. Encrypted backups
+  are purged on a rolling cycle of no more than <strong>90 days</strong>, after
+  which no copy remains. We keep no residual account data beyond what the law
+  requires of us.</p>
+
+  <h2>Questions</h2>
+  <p>Email <a href="mailto:privacy@finpat.app">privacy@finpat.app</a>, or read our
+  <a href="privacy-policy.html">Privacy Policy</a>.</p>
+
+  <footer>© 2026 FinPat. Built for the ones who carry both worlds.</footer>
+</div>
+
+</body>
+</html>

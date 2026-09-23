@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FinPat adaptive icon — background layer.
+
+  Adaptive icons are 108x108dp but masks may crop to the central 66dp circle,
+  so only the middle of this gradient is ever visible. The stop colours are
+  therefore extrapolated outward from the brand ramp (#00677F -> #003543) so
+  that the *visible* portion matches the Play Store listing icon.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF007792"/>
+                <item android:offset="1.0" android:color="#FF002530"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

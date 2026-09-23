@@ -22,6 +22,7 @@ interface FinContextType {
   login: (email: string, name: string, password?: string, mode?: 'login' | 'signup') => Promise<void>;
   logout: () => void;
   addCenter: (center: ResponsibilityCenter) => void;
+  deleteCenter: (id: string) => void;
   addObligation: (obligation: Obligation) => void;
   toggleObligationComplete: (id: string) => void;
   addRemittance: (remittance: Remittance) => void;
@@ -291,6 +292,12 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
   };
 
+  const deleteCenter = (id: string) => {
+    setUserData((prev) => ({ ...prev, centers: prev.centers.filter((c) => c.id !== id) }));
+    if (!session) return;
+    void centersApi.remove(session.accessToken, id);
+  };
+
   const addObligation = (obligation: Obligation) => {
     setUserData((prev) => ({ ...prev, obligations: [...prev.obligations, obligation] }));
     if (!session) return;
@@ -536,12 +543,13 @@ export const FinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <FinContext.Provider value={{ 
-      userData, 
-      updateUserData, 
-      login, 
-      logout, 
-      addCenter, 
+    <FinContext.Provider value={{
+      userData,
+      updateUserData,
+      login,
+      logout,
+      addCenter,
+      deleteCenter,
       addObligation, 
       toggleObligationComplete, 
       addRemittance, 

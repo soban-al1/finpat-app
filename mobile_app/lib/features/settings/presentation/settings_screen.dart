@@ -1,4 +1,5 @@
 import 'package:finpat_mobile/app/app_scope.dart';
+import 'package:finpat_mobile/app/app_state.dart';
 import 'package:finpat_mobile/core/theme/app_theme.dart';
 import 'package:finpat_mobile/core/theme/ui_tokens.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,28 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: UiTokens.itemGap),
+        OutlinedButton.icon(
+          onPressed: () => _deleteAccount(context, app),
+          icon: const Icon(Icons.person_remove_outlined),
+          label: const Text('Delete Account'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            foregroundColor: AppTheme.critical,
+            side: const BorderSide(color: AppTheme.critical),
+          ),
+        ),
+        const SizedBox(height: UiTokens.itemGap),
+        const Text(
+          'Deleting your account permanently erases your profile and all your '
+          'centers, obligations, remittances, and savings.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppTheme.onSurfaceVariant,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: UiTokens.sectionGap),
         Text(
           userName,
           textAlign: TextAlign.center,
@@ -83,6 +106,85 @@ class SettingsScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Two-step, irreversible. The typed confirmation is deliberate: unlike
+  /// "Reset All Data" this also destroys the account itself.
+  Future<void> _deleteAccount(BuildContext context, AppStateController app) async {
+    final input = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) {
+          final canDelete = input.text.trim().toUpperCase() == 'DELETE';
+          return AlertDialog(
+            title: const Text('Delete account?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'This permanently erases your account, profile, centers, '
+                  'obligations, remittances, and savings.\n\n'
+                  'This cannot be undone.',
+                ),
+                const SizedBox(height: UiTokens.blockGap),
+                const Text(
+                  'Type DELETE to confirm',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.1,
+                    color: AppTheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: UiTokens.itemGap),
+                TextField(
+                  controller: input,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: const InputDecoration(hintText: 'DELETE'),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed:
+                    canDelete ? () => Navigator.pop(dialogContext, true) : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.critical,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Delete Account'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    input.dispose();
+    if (confirmed != true || !context.mounted) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    final error = await app.deleteAccount();
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop(); // dismiss the spinner
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: AppTheme.critical),
+      );
+    }
+    // On success the auth listener swaps the tree back to the sign-in screen.
   }
 
   Widget _sectionLabel(String text) {

@@ -911,8 +911,8 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                     if (isDone)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
                         child: Text(
                           'SETTLED',
                           style: TextStyle(

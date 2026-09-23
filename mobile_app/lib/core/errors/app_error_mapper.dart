@@ -1,7 +1,16 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppErrorMapper {
   static String toMessage(Object error) {
+    if (error is SocketException) {
+      return 'No internet connection. Please check your network and try again.';
+    }
+    final msg = error.toString();
+    if (msg.contains('SocketException') || msg.contains('ClientException') || msg.contains('Failed host lookup')) {
+      return 'No internet connection. Please check your network and try again.';
+    }
     if (error is AuthException) {
       final code = error.statusCode;
       if (code == '400' && error.message.toLowerCase().contains('invalid login')) {
