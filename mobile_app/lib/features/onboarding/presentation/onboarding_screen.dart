@@ -10,8 +10,8 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _workLocationController = TextEditingController();
-  final _familyLocationController = TextEditingController();
+  String _workLocation = '';
+  String _familyLocation = '';
   final _incomeAmountController = TextEditingController();
   String _incomeCurrency = 'USD';
   String _incomeFrequency = 'monthly';
@@ -31,8 +31,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   void dispose() {
-    _workLocationController.dispose();
-    _familyLocationController.dispose();
     _incomeAmountController.dispose();
     _customCenterController.dispose();
     super.dispose();
@@ -46,7 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     if (_selectedCenterNames.isEmpty) {
-      setState(() => _error = 'Select at least one responsibility.');
+      setState(() => _error = 'Select at least one commitment.');
       return;
     }
 
@@ -60,8 +58,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         .toList();
 
     final err = await app.saveOnboarding(
-      workLocation: _workLocationController.text.trim(),
-      familyLocation: _familyLocationController.text.trim(),
+      workLocation: _workLocation,
+      familyLocation: _familyLocation,
       incomeAmount: incomeAmount,
       incomeCurrency: _incomeCurrency,
       incomeFrequency: _incomeFrequency,
@@ -110,40 +108,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Future<void> _openCountryPicker({required bool isWork}) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: AppTheme.surface,
+      builder: (context) => _CountryPickerSheet(
+        title: isWork ? 'Where do you work?' : 'Where do you send money?',
+        selected: isWork ? _workLocation : _familyLocation,
+      ),
+    );
+    if (selected != null && mounted) {
+      setState(() {
+        if (isWork) {
+          _workLocation = selected;
+          final currency = _countryCurrencyMap[selected];
+          if (currency != null && _currencies.any((c) => c.code == currency)) {
+            _incomeCurrency = currency;
+          }
+        } else {
+          _familyLocation = selected;
+        }
+      });
+    }
+  }
+
   Future<void> _openCurrencyPicker() async {
     final selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: AppTheme.surface,
-      builder: (context) {
-        return SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              const Text(
-                'Select country / currency',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ..._currencies.map((c) {
-                final isSelected = c.code == _incomeCurrency;
-                return ListTile(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  tileColor: isSelected ? AppTheme.primary.withValues(alpha: 0.08) : null,
-                  leading: Text(c.flag, style: const TextStyle(fontSize: 20)),
-                  title: Text(c.code, style: const TextStyle(fontWeight: FontWeight.w800)),
-                  trailing: isSelected ? const Icon(Icons.check_rounded, color: AppTheme.primary) : null,
-                  onTap: () => Navigator.pop(context, c.code),
-                );
-              }),
-            ],
-          ),
-        );
-      },
+      builder: (context) => _CurrencyPickerSheet(selected: _incomeCurrency),
     );
 
     if (selected != null && mounted) {
@@ -205,22 +202,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     if (_step == 0) ...[
                       const _OnboardLabel('WHERE DO YOU WORK?'),
                       const SizedBox(height: 10),
-                      TextField(
-                        controller: _workLocationController,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g. Dubai, London',
-                          prefixIcon: Icon(Icons.place_outlined),
-                        ),
+                      _CountryField(
+                        value: _workLocation,
+                        hint: 'e.g. Dubai, London',
+                        icon: Icons.place_outlined,
+                        onTap: () => _openCountryPicker(isWork: true),
                       ),
                       const SizedBox(height: 22),
                       const _OnboardLabel('WHERE DO YOU USUALLY SEND MONEY?'),
                       const SizedBox(height: 10),
-                      TextField(
-                        controller: _familyLocationController,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g. Mumbai, Manila',
-                          prefixIcon: Icon(Icons.favorite_border),
-                        ),
+                      _CountryField(
+                        value: _familyLocation,
+                        hint: 'e.g. Mumbai, Manila',
+                        icon: Icons.favorite_border,
+                        onTap: () => _openCountryPicker(isWork: false),
                       ),
                     ] else if (_step == 1) ...[
                       const _OnboardLabel('SALARY AMOUNT'),
@@ -496,6 +491,375 @@ class _OnboardLabel extends StatelessWidget {
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
       ),
+    );
+  }
+}
+
+class _CountryField extends StatelessWidget {
+  const _CountryField({
+    required this.value,
+    required this.hint,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String value;
+  final String hint;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(22),
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
+        ),
+        child: Text(
+          value.isEmpty ? hint : value,
+          style: TextStyle(
+            fontSize: 16,
+            color: value.isEmpty ? AppTheme.onSurfaceVariant.withValues(alpha: 0.5) : AppTheme.onSurface,
+            fontWeight: value.isEmpty ? FontWeight.w400 : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryPickerSheet extends StatefulWidget {
+  const _CountryPickerSheet({required this.title, required this.selected});
+
+  final String title;
+  final String selected;
+
+  @override
+  State<_CountryPickerSheet> createState() => _CountryPickerSheetState();
+}
+
+class _CountryPickerSheetState extends State<_CountryPickerSheet> {
+  final _searchController = TextEditingController();
+  List<_CountryOption> _filtered = _countries;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String query) {
+    final q = query.toLowerCase();
+    setState(() {
+      _filtered = q.isEmpty
+          ? _countries
+          : _countries.where((c) => c.name.toLowerCase().contains(q)).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.75,
+      minChildSize: 0.5,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: _onSearch,
+                decoration: const InputDecoration(
+                  hintText: 'Search country...',
+                  prefixIcon: Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: _filtered.length,
+                  itemBuilder: (context, i) {
+                    final country = _filtered[i];
+                    final isSelected = country.name == widget.selected;
+                    return ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      tileColor: isSelected ? AppTheme.primary.withValues(alpha: 0.08) : null,
+                      leading: Text(country.flag, style: const TextStyle(fontSize: 24)),
+                      title: Text(
+                        country.name,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                        ),
+                      ),
+                      trailing: isSelected ? const Icon(Icons.check_rounded, color: AppTheme.primary) : null,
+                      onTap: () => Navigator.pop(context, country.name),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+const Map<String, String> _countryCurrencyMap = {
+  'Afghanistan': 'USD',
+  'Albania': 'EUR',
+  'Algeria': 'USD',
+  'Argentina': 'USD',
+  'Australia': 'USD',
+  'Austria': 'EUR',
+  'Bangladesh': 'USD',
+  'Belgium': 'EUR',
+  'Brazil': 'USD',
+  'Brunei': 'BND',
+  'Cambodia': 'KHR',
+  'Canada': 'USD',
+  'China': 'USD',
+  'Colombia': 'USD',
+  'Egypt': 'EGP',
+  'Ethiopia': 'USD',
+  'France': 'EUR',
+  'Germany': 'EUR',
+  'Ghana': 'USD',
+  'Greece': 'EUR',
+  'Hong Kong': 'USD',
+  'India': 'INR',
+  'Indonesia': 'IDR',
+  'Iran': 'USD',
+  'Iraq': 'USD',
+  'Ireland': 'EUR',
+  'Israel': 'USD',
+  'Italy': 'EUR',
+  'Japan': 'USD',
+  'Jordan': 'USD',
+  'Kenya': 'USD',
+  'Kuwait': 'USD',
+  'Laos': 'LAK',
+  'Lebanon': 'USD',
+  'Malaysia': 'MYR',
+  'Mexico': 'USD',
+  'Morocco': 'USD',
+  'Myanmar': 'MMK',
+  'Nepal': 'INR',
+  'Netherlands': 'EUR',
+  'New Zealand': 'USD',
+  'Nigeria': 'USD',
+  'Norway': 'USD',
+  'Oman': 'USD',
+  'Pakistan': 'PKR',
+  'Philippines': 'PHP',
+  'Poland': 'EUR',
+  'Portugal': 'EUR',
+  'Qatar': 'USD',
+  'Romania': 'EUR',
+  'Russia': 'USD',
+  'Saudi Arabia': 'USD',
+  'Singapore': 'SGD',
+  'South Africa': 'USD',
+  'South Korea': 'USD',
+  'Spain': 'EUR',
+  'Sri Lanka': 'USD',
+  'Sweden': 'USD',
+  'Switzerland': 'USD',
+  'Taiwan': 'USD',
+  'Tanzania': 'USD',
+  'Thailand': 'THB',
+  'Turkey': 'USD',
+  'Uganda': 'USD',
+  'Ukraine': 'USD',
+  'United Arab Emirates': 'AED',
+  'United Kingdom': 'GBP',
+  'United States': 'USD',
+  'Vietnam': 'VND',
+  'Yemen': 'USD',
+  'Zimbabwe': 'USD',
+};
+
+class _CountryOption {
+  const _CountryOption(this.name, this.flag);
+  final String name;
+  final String flag;
+}
+
+const List<_CountryOption> _countries = [
+  _CountryOption('Afghanistan', '🇦🇫'),
+  _CountryOption('Albania', '🇦🇱'),
+  _CountryOption('Algeria', '🇩🇿'),
+  _CountryOption('Argentina', '🇦🇷'),
+  _CountryOption('Australia', '🇦🇺'),
+  _CountryOption('Austria', '🇦🇹'),
+  _CountryOption('Bangladesh', '🇧🇩'),
+  _CountryOption('Belgium', '🇧🇪'),
+  _CountryOption('Brazil', '🇧🇷'),
+  _CountryOption('Brunei', '🇧🇳'),
+  _CountryOption('Cambodia', '🇰🇭'),
+  _CountryOption('Canada', '🇨🇦'),
+  _CountryOption('China', '🇨🇳'),
+  _CountryOption('Colombia', '🇨🇴'),
+  _CountryOption('Egypt', '🇪🇬'),
+  _CountryOption('Ethiopia', '🇪🇹'),
+  _CountryOption('France', '🇫🇷'),
+  _CountryOption('Germany', '🇩🇪'),
+  _CountryOption('Ghana', '🇬🇭'),
+  _CountryOption('Greece', '🇬🇷'),
+  _CountryOption('Hong Kong', '🇭🇰'),
+  _CountryOption('India', '🇮🇳'),
+  _CountryOption('Indonesia', '🇮🇩'),
+  _CountryOption('Iran', '🇮🇷'),
+  _CountryOption('Iraq', '🇮🇶'),
+  _CountryOption('Ireland', '🇮🇪'),
+  _CountryOption('Israel', '🇮🇱'),
+  _CountryOption('Italy', '🇮🇹'),
+  _CountryOption('Japan', '🇯🇵'),
+  _CountryOption('Jordan', '🇯🇴'),
+  _CountryOption('Kenya', '🇰🇪'),
+  _CountryOption('Kuwait', '🇰🇼'),
+  _CountryOption('Laos', '🇱🇦'),
+  _CountryOption('Lebanon', '🇱🇧'),
+  _CountryOption('Malaysia', '🇲🇾'),
+  _CountryOption('Mexico', '🇲🇽'),
+  _CountryOption('Morocco', '🇲🇦'),
+  _CountryOption('Myanmar', '🇲🇲'),
+  _CountryOption('Nepal', '🇳🇵'),
+  _CountryOption('Netherlands', '🇳🇱'),
+  _CountryOption('New Zealand', '🇳🇿'),
+  _CountryOption('Nigeria', '🇳🇬'),
+  _CountryOption('Norway', '🇳🇴'),
+  _CountryOption('Oman', '🇴🇲'),
+  _CountryOption('Pakistan', '🇵🇰'),
+  _CountryOption('Philippines', '🇵🇭'),
+  _CountryOption('Poland', '🇵🇱'),
+  _CountryOption('Portugal', '🇵🇹'),
+  _CountryOption('Qatar', '🇶🇦'),
+  _CountryOption('Romania', '🇷🇴'),
+  _CountryOption('Russia', '🇷🇺'),
+  _CountryOption('Saudi Arabia', '🇸🇦'),
+  _CountryOption('Singapore', '🇸🇬'),
+  _CountryOption('South Africa', '🇿🇦'),
+  _CountryOption('South Korea', '🇰🇷'),
+  _CountryOption('Spain', '🇪🇸'),
+  _CountryOption('Sri Lanka', '🇱🇰'),
+  _CountryOption('Sweden', '🇸🇪'),
+  _CountryOption('Switzerland', '🇨🇭'),
+  _CountryOption('Taiwan', '🇹🇼'),
+  _CountryOption('Tanzania', '🇹🇿'),
+  _CountryOption('Thailand', '🇹🇭'),
+  _CountryOption('Turkey', '🇹🇷'),
+  _CountryOption('Uganda', '🇺🇬'),
+  _CountryOption('Ukraine', '🇺🇦'),
+  _CountryOption('United Arab Emirates', '🇦🇪'),
+  _CountryOption('United Kingdom', '🇬🇧'),
+  _CountryOption('United States', '🇺🇸'),
+  _CountryOption('Vietnam', '🇻🇳'),
+  _CountryOption('Yemen', '🇾🇪'),
+  _CountryOption('Zimbabwe', '🇿🇼'),
+];
+
+class _CurrencyPickerSheet extends StatefulWidget {
+  const _CurrencyPickerSheet({required this.selected});
+  final String selected;
+
+  @override
+  State<_CurrencyPickerSheet> createState() => _CurrencyPickerSheetState();
+}
+
+class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
+  final _searchController = TextEditingController();
+  List<_CurrencyOption> _filtered = _currencies;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String query) {
+    final q = query.toLowerCase();
+    setState(() {
+      _filtered = q.isEmpty
+          ? _currencies
+          : _currencies.where((c) => c.code.toLowerCase().contains(q)).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.75,
+      minChildSize: 0.5,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select currency',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: _onSearch,
+                decoration: const InputDecoration(
+                  hintText: 'Search currency...',
+                  prefixIcon: Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: _filtered.length,
+                  itemBuilder: (context, i) {
+                    final c = _filtered[i];
+                    final isSelected = c.code == widget.selected;
+                    return ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      tileColor: isSelected ? AppTheme.primary.withValues(alpha: 0.08) : null,
+                      leading: Text(c.flag, style: const TextStyle(fontSize: 24)),
+                      title: Text(c.code, style: const TextStyle(fontWeight: FontWeight.w800)),
+                      trailing: isSelected ? const Icon(Icons.check_rounded, color: AppTheme.primary) : null,
+                      onTap: () => Navigator.pop(context, c.code),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,0 +1,31 @@
+{
+  // AppEnv has no compiled-in fallback, so every launch must supply the
+  // Supabase config or the app boots into MissingConfigScreen.
+  // Copy .env.prod.json.example to .env.prod.json first.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FinPat (debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define-from-file=.env.prod.json"]
+    },
+    {
+      "name": "FinPat (profile)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define-from-file=.env.prod.json"]
+    },
+    {
+      "name": "FinPat (release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define-from-file=.env.prod.json"]
+    }
+  ]
+}

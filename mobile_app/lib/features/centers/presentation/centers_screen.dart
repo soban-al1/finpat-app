@@ -43,9 +43,10 @@ const List<Color> _centerColors = [
 ];
 
 String _colorToHex(Color c) {
-  final r = ((c.value >> 16) & 0xFF).toRadixString(16).padLeft(2, '0');
-  final g = ((c.value >> 8) & 0xFF).toRadixString(16).padLeft(2, '0');
-  final b = (c.value & 0xFF).toRadixString(16).padLeft(2, '0');
+  final argb = c.toARGB32();
+  final r = ((argb >> 16) & 0xFF).toRadixString(16).padLeft(2, '0');
+  final g = ((argb >> 8) & 0xFF).toRadixString(16).padLeft(2, '0');
+  final b = (argb & 0xFF).toRadixString(16).padLeft(2, '0');
   return '#$r$g$b'.toUpperCase();
 }
 
@@ -1402,7 +1403,7 @@ class _CenterWizardSheetState extends State<_CenterWizardSheet> {
                   Switch(
                     value: _hasGoal,
                     onChanged: (v) => setState(() => _hasGoal = v),
-                    activeColor: AppTheme.primary,
+                    activeThumbColor: AppTheme.primary,
                   ),
                 ],
               ),
