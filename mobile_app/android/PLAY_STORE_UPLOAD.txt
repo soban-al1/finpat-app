@@ -1,0 +1,66 @@
+FinPat — Google Play release upload
+===================================
+
+Upload this file in Play Console → Release → Production (or testing track):
+  build/app/outputs/bundle/release/app-release.aab
+
+App ID: com.finpat.app
+Version: 1.0.0 (versionCode 1)
+
+Signing (KEEP SAFE — required for all future updates)
+-----------------------------------------------------
+Keystore: android/upload-keystore.jks
+Alias:    upload
+Password: NOT stored here. See ~/finpat-signing-credentials.txt, and move it
+          into a password manager.
+
+Values live in android/key.properties, which is gitignored and never committed.
+
+Back up upload-keystore.jks AND the password offline, in separate places. If you
+lose either, you cannot publish updates to this listing without Google support.
+
+Play Console checklist (not in the AAB)
+---------------------------------------
+- Create app with package name com.finpat.app
+- Store listing: title, short/full description, screenshots, feature graphic
+- App category, contact email
+- Privacy policy URL          -> host mobile_app/store/privacy-policy.html
+- Data deletion URL           -> host mobile_app/store/delete-account.html
+- Data safety form (Supabase auth/data; no analytics, ads, or tracking SDKs)
+- Content rating questionnaire
+- Target countries and pricing (free/paid)
+
+Backend prerequisites (Supabase project egvmoywykbsjsbpqjhvm)
+------------------------------------------------------------
+The app calls six edge functions. As of 2026-09-23 only two are deployed:
+
+  DEPLOYED    toggle-obligation   marks obligations paid, sets the FX rate
+  DEPLOYED    delete-account      required by Play; verified end to end
+
+  MISSING     dashboard-summary   Home metrics. App falls back to computing
+                                  income/spent/remaining/pressure on the client,
+                                  so Home still renders — but totals are NOT
+                                  server-side FX-adjusted, which the API spec
+                                  says is the source of truth. Mixed-currency
+                                  users will see wrong totals.
+  MISSING     exchange-rates      warms the currency_rates cache. Silent
+                                  failure; app uses static fallback rates, so
+                                  conversions drift from real rates over time.
+  MISSING     reset-cycle         no fallback. "Reset cycle" surfaces an error
+                                  to the user — the feature is broken.
+  MISSING     forecast            no fallback. Forecast screen renders empty.
+
+Source for the four missing functions is NOT in this repo; only
+supabase/functions/delete-account exists here. Find or rewrite them and deploy
+before release, or cut Reset Cycle and Forecast from v1.
+
+  supabase functions list   --project-ref egvmoywykbsjsbpqjhvm
+  supabase functions deploy <name> --project-ref egvmoywykbsjsbpqjhvm
+
+Note: the project had been auto-paused by Supabase for inactivity. A paused
+project takes the whole backend down. Watch for that before release.
+
+Rebuild release bundle
+----------------------
+cd mobile_app
+flutter build appbundle --release --dart-define-from-file=.env.prod.json

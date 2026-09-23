@@ -31,7 +31,6 @@ ios/Flutter/Flutter.podspec
 android/key.properties
 android/**/*.jks
 android/**/*.keystore
-android/PLAY_STORE_UPLOAD.txt
 
 # Local environment secrets (never commit)
 .env
