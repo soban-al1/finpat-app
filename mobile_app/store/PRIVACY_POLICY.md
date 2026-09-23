@@ -1,13 +1,15 @@
 # FinPat — Privacy Policy
 
-**Effective date:** 2 September 2026
-**Last updated:** 2 September 2026
+**Effective date:** 23 September 2026
+**Last updated:** 23 September 2026
 
-> **Before you publish:** replace every `[BRACKETED]` placeholder below with your
-> real details. This document was drafted from an audit of what the FinPat app
-> actually collects and transmits, so the data inventory is accurate — but it is
-> not legal advice. Have it reviewed before you rely on it, particularly if you
-> target the EU/UK (GDPR), California (CCPA/CPRA), or the Gulf states.
+> **Before you publish:** three `[BRACKETED]` placeholders remain — your full
+> name, your country of residence, and the URL where you host
+> `delete-account.html`. This document was drafted from an audit of what the
+> FinPat app actually collects and transmits, so the data inventory is accurate
+> — but it is not legal advice. Have it reviewed before you rely on it,
+> particularly if you target the EU/UK (GDPR), California (CCPA/CPRA), or the
+> Gulf states.
 
 ---
 
@@ -17,9 +19,9 @@ FinPat ("FinPat", "we", "us") is a personal money-planning app for people who
 support family in another country. This policy explains what we collect, why,
 and what you can do about it.
 
-- **Data controller:** [LEGAL ENTITY OR YOUR FULL NAME]
-- **Address:** [POSTAL ADDRESS]
-- **Contact:** [privacy@finpat.app]
+- **Data controller:** [YOUR FULL NAME], operating as a sole trader
+- **Country:** [COUNTRY OF RESIDENCE]
+- **Contact:** privacy@finpat.app
 
 This policy covers the FinPat Android app and the backend that serves it. It
 does not cover any third-party site we link to.
@@ -108,7 +110,7 @@ We keep this list short on purpose.
 
 | Processor | Role | Where |
 |---|---|---|
-| **Supabase** | Authentication, database, and backend hosting — stores the data in section 3 on our behalf | [REGION — e.g. AWS eu-central-1] |
+| **Supabase** | Authentication, database, and backend hosting — stores the data in section 3 on our behalf | India (Mumbai, `ap-south-1`) |
 
 Supabase acts on our instructions as a processor and does not use your data for
 its own purposes. See supabase.com/privacy.
@@ -147,9 +149,10 @@ Wherever you live, you can ask us to:
 DELETE to confirm. This erases your account, profile, centres, obligations,
 remittances, and savings immediately and permanently. It cannot be undone.
 
-**If you can't sign in,** email [privacy@finpat.app] from your account address
+**If you can't sign in,** email privacy@finpat.app from your account address
 with the subject "Delete my account", or follow the instructions at
-[ACCOUNT DELETION URL]. We complete verified requests within 30 days.
+[URL WHERE YOU HOST delete-account.html]. We complete verified requests within
+30 days.
 
 **To start over without deleting your account:** *Settings → Reset All Data*
 clears your centres, obligations, remittances, and savings but keeps your
@@ -165,16 +168,17 @@ that is your national DPA; in the UK, the ICO (ico.org.uk).
 ## 9. International transfers
 
 FinPat is built for people whose lives span two countries, so your data may be
-processed outside the country you live in — including in
-[REGION/COUNTRY OF YOUR SUPABASE PROJECT]. Where we move personal data out of
-the EEA or UK, we rely on the European Commission's **Standard Contractual
-Clauses** (and the UK Addendum) to protect it.
+processed outside the country you live in. Our database and authentication are
+hosted in **India (Mumbai, `ap-south-1`)**, so wherever you use FinPat, your
+data is stored there. Where we move personal data out of the EEA or UK, we rely
+on the European Commission's **Standard Contractual Clauses** (and the UK
+Addendum) to protect it.
 
 ## 10. Children
 
 FinPat is not intended for anyone under **16**, and we do not knowingly collect
 data from children. If you believe a child has given us personal data, write to
-[privacy@finpat.app] and we will delete it.
+privacy@finpat.app and we will delete it.
 
 ## 11. Changes to this policy
 
@@ -186,6 +190,6 @@ that means you accept the updated policy.
 
 Questions, requests, or complaints:
 
-**[privacy@finpat.app]**
-[LEGAL ENTITY OR YOUR FULL NAME]
-[POSTAL ADDRESS]
+**privacy@finpat.app**
+[YOUR FULL NAME], sole trader
+[COUNTRY OF RESIDENCE]
